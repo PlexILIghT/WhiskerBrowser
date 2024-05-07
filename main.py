@@ -3,6 +3,10 @@ from BrowserUI import BrowserUI
 from PyQt6.QtWebEngineWidgets import QWebEngineView
 from PyQt6.QtCore import QUrl
 
+
+# Осталось сделать вкладки, поддержку стримов, рефреш, назад-вперёд, историю, ссылки в реальнои времени, закладки, память вкладок.
+# Также почему-то вылетают на моём ПК видео, а на ноуте - нет.
+
 class Browser(QtWidgets.QWidget, BrowserUI):
     def __init__(self):
         super().__init__()
