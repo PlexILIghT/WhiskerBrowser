@@ -23,25 +23,25 @@ class Browser(QtWidgets.QWidget, BrowserUI.Ui_Form):
         self.searchButton.clicked.connect(self.OnEnterPressed)
         self.newTabButton.clicked.connect(self.CreateNewWindow)
         self.menuButton.clicked.connect(self.OpenMenu)
-        self.webPage.loadFinished.connect(self.pageLoaded)
     
     def OnEnterPressed(self):
         self.webPage.setParent(None)
         self.webPage = QWebEngineView()
         self.gridLayout.addWidget(self.webPage, 2, 0)
 
+        self.webPage.urlChanged.connect(self.UrlChanged)
+
         if (self.sender().objectName() == "urlLineEdit"):
             if ("https://" == self.urlLineEdit.text()[:8]):
                 self.webPage.setUrl(QUrl(self.urlLineEdit.text()))
             else:
                 self.webPage.setUrl(QUrl(self.searchStart + self.urlLineEdit.text()))
-                searchHistory.append(self.urlLineEdit.text())
         else:
             if ("https://" == self.urlLineEdit2.text()[:8]):
                 self.webPage.setUrl(QUrl(self.urlLineEdit2.text()))
             else:
                 self.webPage.setUrl(QUrl(self.searchStart + self.urlLineEdit2.text()))
-                searchHistory.append(self.urlLineEdit2.text())
+        
         
     
     def CreateNewWindow(self):
@@ -51,7 +51,6 @@ class Browser(QtWidgets.QWidget, BrowserUI.Ui_Form):
         windows[-1].show()
     
     def Back(self):
-        #print(self.webPage.url().toString())
         self.webPage.back()
     
     def Forward(self):
@@ -64,12 +63,22 @@ class Browser(QtWidgets.QWidget, BrowserUI.Ui_Form):
         self.menu = Menu()
         self.menu.show()
     
-    def pageLoaded(self):
+    def UrlChanged(self):
+        print("CHANGED")
         conn = sqlite3.connect('browser.db')
         cursor = conn.cursor()
-        cursor.execute('INSERT INTO browsing_history (url, title) VALUES (?, ?)', (self.webPage.url().toString(), self.webPage.title()))
+        cursor.execute('INSERT INTO browserHistory (url, title) VALUES (?, ?)', (self.webPage.url().toString(), self.webPage.title()))
         conn.commit()
         conn.close()
+    
+    def LoadUrl(self, url):
+        self.webPage.setParent(None)
+        self.webPage = QWebEngineView()
+        self.gridLayout.addWidget(self.webPage, 2, 0)
+
+        self.webPage.urlChanged.connect(self.UrlChanged)
+        
+        self.webPage.setUrl(QUrl(url))
 
 
 class Menu(QtWidgets.QWidget, MenuUI.Ui_Form):
@@ -112,14 +121,20 @@ class Menu(QtWidgets.QWidget, MenuUI.Ui_Form):
     def ClearBrowserHistory(self):
         clearDialog = ClearDialog()
         if clearDialog.exec():
-            ### УДАЛЕНИЕ ИСТОРИИ БРАУЗЕРА ###
-            pass
+            conn = sqlite3.connect("browser.db")
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM browserHistory")
+            conn.commit()
+            conn.close()
     
     def ClearSearchHistory(self):
         clearDialog = ClearDialog()
         if clearDialog.exec():
-            ### УДАЛЕНИЕ ИСТОРИИ ПОИСКА ###
-            pass
+            conn = sqlite3.connect("browser.db")
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM searchHistory")
+            conn.commit()
+            conn.close()
 
 
 class BrowserHistory(QtWidgets.QWidget, HistoryUI.Ui_Form):
@@ -132,14 +147,25 @@ class BrowserHistory(QtWidgets.QWidget, HistoryUI.Ui_Form):
         self.backButton.clicked.connect(self.Close)
         self.historyName.setText("История браузера")
         self.LoadBrowserHistory()
+        self.historyList.itemDoubleClicked.connect(self.OpenPage)
     
     def Close(self):
         self.close()
     
     def LoadBrowserHistory(self):
-        ### Загрузка истории браузера ###
-        for url in browserHistory:
-            self.historyList.addItem(url)
+        conn = sqlite3.connect('browser.db')
+        cursor = conn.cursor()
+        data = cursor.execute("SELECT url FROM browserHistory")
+        for row in data:
+            self.historyList.addItem(row[0])
+    
+    def OpenPage(self):
+        url = self.historyList.currentItem().text()
+        page = Browser()
+        page.LoadUrl(url)
+        windows.append(page)
+        windows[-1].show()
+
 
 class SearchHistory(QtWidgets.QWidget, HistoryUI.Ui_Form):
     def __init__(self):
@@ -156,9 +182,18 @@ class SearchHistory(QtWidgets.QWidget, HistoryUI.Ui_Form):
         self.close()
     
     def LoadSearchHistory(self):
-        ### Загрузка истории поиска ###
-        for url in searchHistory:
-            self.historyList.addItem(url)
+        conn = sqlite3.connect('browser.db')
+        cursor = conn.cursor()
+        data = cursor.execute("SELECT query FROM searchHistory")
+        for row in data:
+            self.historyList.addItem(row[0])
+    
+    def OpenPage(self):
+        url = self.historyList.currentItem().text()
+        page = Browser()
+        page.LoadUrl(page.startPage + url)
+        windows.append(page)
+        windows[-1].show()
 
 
 class ClearDialog(QtWidgets.QDialog):
@@ -185,7 +220,7 @@ def create_tables():
 
     # история поиска
     cursor.execute('''
-        CREATE TABLE IF NOT EXISTS search_history (
+        CREATE TABLE IF NOT EXISTS searchHistory (
             id INTEGER PRIMARY KEY,
             query TEXT NOT NULL,
             timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -194,7 +229,7 @@ def create_tables():
 
     # общая история
     cursor.execute('''
-        CREATE TABLE IF NOT EXISTS browsing_history (
+        CREATE TABLE IF NOT EXISTS browserHistory (
             id INTEGER PRIMARY KEY,
             url TEXT NOT NULL,
             title TEXT,
@@ -206,11 +241,14 @@ def create_tables():
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS settings (
             id INTEGER PRIMARY KEY,
-            setting_name TEXT NOT NULL,
-            setting_value TEXT NOT NULL
+            settingName TEXT NOT NULL,
+            settingValue TEXT NOT NULL
         )
     ''')
 
+    settingsExist = cursor.execute("SELECT * FROM settings")
+    if list(settingsExist) == []:
+        cursor.executemany("INSERT INTO settings (id, settingName, settingValue) VALUES (?, ?, ?)", defaultSettings)
     conn.commit()
     conn.close()
 
@@ -218,8 +256,10 @@ if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
     windows = []
-    browserHistory = 
-    searchHistory = []
+    defaultSettings = [
+    (0, "searchSystem", 0),
+    (1, "saveBrowserHistoryFlag", 1),
+    (2, "saveSearchHistoryFlag", 1)]
     browser = Browser()
     windows.append(browser)
     windows[0].show()
