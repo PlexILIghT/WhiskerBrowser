@@ -14,12 +14,9 @@ class Browser(QtWidgets.QWidget, BrowserUI.Ui_Form):
         self.setupUi(self)
         self.setWindowTitle(" ")
         self.SetUpFunctions()
-        self.loadIcons()
+        self.LoadIcons()
 
-        if int(sessionSettings[0][2]) == 0:
-            self.searchStart = "https://google.com/search?q="
-        elif int(sessionSettings[0][2]) == 1:
-            self.searchStart = "https://ya.ru/search/?text="
+        self.SetSearchStart()
 
     def SetUpFunctions(self):
         self.urlLineEdit.returnPressed.connect(self.OnEnterPressed)
@@ -47,10 +44,7 @@ class Browser(QtWidgets.QWidget, BrowserUI.Ui_Form):
 
         self.webPage.urlChanged.connect(self.UrlChanged)
 
-        if int(sessionSettings[0][2]) == 0:
-            self.searchStart = "https://google.com/search?q="
-        elif int(sessionSettings[0][2]) == 1:
-            self.searchStart = "https://ya.ru/search/?text="
+        self.SetSearchStart()
 
         if (self.sender().objectName() == "urlLineEdit"):
             url = self.CheckUrlStart(self.urlLineEdit.text())
@@ -103,6 +97,7 @@ class Browser(QtWidgets.QWidget, BrowserUI.Ui_Form):
         self.gridLayout.addWidget(self.webPage, 2, 0)
 
         self.webPage.urlChanged.connect(self.UrlChanged)
+        self.SetSearchStart()
         
         self.webPage.setUrl(QUrl(url))
     
@@ -127,6 +122,7 @@ class Browser(QtWidgets.QWidget, BrowserUI.Ui_Form):
         self.gridLayout.addWidget(self.webPage, 2, 0)
 
         self.webPage.urlChanged.connect(self.UrlChanged)
+        self.SetSearchStart()
         
         self.webPage.setUrl(QUrl(self.searchStart + self.searchHistoryList.currentItem().text()))
 
@@ -164,7 +160,19 @@ class Browser(QtWidgets.QWidget, BrowserUI.Ui_Form):
         
         self.webPage.setUrl(QUrl(url))
     
-    def loadIcons(self):
+    def SetSearchStart(self):
+        if int(sessionSettings[0][2]) == 0:
+            self.searchStart = "https://www.google.com/search?q="
+        elif int(sessionSettings[0][2]) == 1:
+            self.searchStart = "https://ya.ru/search/?text="
+        elif int(sessionSettings[0][2]) == 2:
+            self.searchStart = "https://www.bing.com/search?q="
+        elif int(sessionSettings[0][2]) == 3:
+            self.searchStart = "https://search.yahoo.com/search?p="
+        elif int(sessionSettings[0][2]) == 4:
+            self.searchStart = "https://duckduckgo.com/?t=h_&q="
+    
+    def LoadIcons(self):
         self.menuButton.setIcon(QtGui.QIcon("svgs/menu.svg"))
         self.menuButton.setIconSize(QSize(20, 20))
 
@@ -205,7 +213,8 @@ class Menu(QtWidgets.QWidget, MenuUI.Ui_Form):
         self.clearSearchHistoryButton.clicked.connect(self.ClearSearchHistory)
         self.bookmarksButton.clicked.connect(self.OpenBookmarks)
         self.clearBookmarksButton.clicked.connect(self.ClearBookmarks)
-        self.searchSystem.addItems(["Google", "Yandex"])
+        self.searchSystem.addItems(["Google", "Yandex", "Bing", "Yahoo!", "DuckDuckGo"])
+        self.LoadIcons()
     
     def OpenBrowserHistory(self):
         self.browserHistory = BrowserHistory()
@@ -268,6 +277,14 @@ class Menu(QtWidgets.QWidget, MenuUI.Ui_Form):
             cursor.execute("DELETE FROM bookmarks")
             conn.commit()
             conn.close()
+    
+    def LoadIcons(self):
+        self.searchSystem.setItemIcon(0, QtGui.QIcon("svgs/refresh.svg"))
+        self.searchSystem.setItemIcon(1, QtGui.QIcon("svgs/newtab.svg"))
+        self.searchSystem.setItemIcon(2, QtGui.QIcon("svgs/refresh.svg"))
+        self.searchSystem.setItemIcon(3, QtGui.QIcon("svgs/newtab.svg"))
+        self.searchSystem.setItemIcon(4, QtGui.QIcon("svgs/refresh.svg"))
+        self.searchSystem.setIconSize(QSize(35, 35))
 
 
 
