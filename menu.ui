@@ -205,7 +205,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="favoritesButton">
+        <widget class="QPushButton" name="bookmarksButton">
          <property name="maximumSize">
           <size>
            <width>200</width>
@@ -223,7 +223,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="clearFavoritesButton">
+        <widget class="QPushButton" name="clearBookmarksButton">
          <property name="maximumSize">
           <size>
            <width>200</width>

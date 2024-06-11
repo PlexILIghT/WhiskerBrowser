@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1134</width>
-    <height>648</height>
+    <width>1153</width>
+    <height>626</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -35,12 +35,12 @@
       <number>1</number>
      </property>
      <item row="1" column="0">
-      <layout class="QHBoxLayout" name="favoriteTab">
+      <layout class="QHBoxLayout" name="bookmarksTab">
        <property name="spacing">
         <number>1</number>
        </property>
        <item>
-        <widget class="QPushButton" name="favoriteButton">
+        <widget class="QPushButton" name="bookmarkButton">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -134,7 +134,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="addToFavoriteButton">
+        <widget class="QPushButton" name="addToBookmarksButton">
          <property name="maximumSize">
           <size>
            <width>30</width>
@@ -209,6 +209,8 @@
          <property name="font">
           <font>
            <pointsize>50</pointsize>
+           <weight>75</weight>
+           <bold>true</bold>
           </font>
          </property>
          <property name="contextMenuPolicy">
@@ -260,7 +262,29 @@
         </layout>
        </item>
        <item>
-        <widget class="QListWidget" name="searchHistoryList"/>
+        <layout class="QGridLayout" name="gridLayout_3">
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item row="0" column="0">
+          <widget class="QListWidget" name="searchHistoryList">
+           <property name="maximumSize">
+            <size>
+             <width>500</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>15</pointsize>
+            </font>
+           </property>
+           <property name="layoutDirection">
+            <enum>Qt::LeftToRight</enum>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
        <item>
         <spacer name="verticalSpacer">
