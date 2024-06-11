@@ -1,7 +1,7 @@
 from PyQt6 import QtCore, QtGui, QtWidgets
 import BrowserUI, MenuUI, HistoryUI
 from PyQt6.QtWebEngineWidgets import QWebEngineView
-from PyQt6.QtCore import QUrl
+from PyQt6.QtCore import QUrl, QSize
 import sqlite3
 
 class Browser(QtWidgets.QWidget, BrowserUI.Ui_Form):
@@ -14,10 +14,34 @@ class Browser(QtWidgets.QWidget, BrowserUI.Ui_Form):
         self.setupUi(self)
         self.setWindowTitle(" ")
         self.SetUpFunctions()
+        self.loadIcons()
+
         if int(sessionSettings[0][2]) == 0:
             self.searchStart = "https://google.com/search?q="
         elif int(sessionSettings[0][2]) == 1:
             self.searchStart = "https://ya.ru/search/?text="
+
+    def loadIcons(self):
+        self.menuButton.setIcon(QtGui.QIcon("svgs/menu.svg"))
+        self.menuButton.setIconSize(QSize(16, 16))
+
+        self.reloadButton.setIcon(QtGui.QIcon("svgs/refresh.svg"))
+        self.reloadButton.setIconSize(QSize(20, 20))
+
+        self.backButton.setIcon(QtGui.QIcon("svgs/back1.svg"))
+        self.backButton.setIconSize(QSize(20, 20))
+
+        self.forwardButton.setIcon(QtGui.QIcon("svgs/forward.svg"))
+        self.forwardButton.setIconSize(QSize(20, 20))
+
+        self.addToFavoriteButton.setIcon(QtGui.QIcon("svgs/bookmark.svg"))
+        self.addToFavoriteButton.setIconSize(QSize(20, 20))
+
+        self.newTabButton.setIcon(QtGui.QIcon("svgs/newtab.svg"))
+        self.newTabButton.setIconSize(QSize(20, 20))
+
+        self.searchButton.setIcon(QtGui.QIcon("svgs/search.svg"))
+        self.searchButton.setIconSize(QSize(20, 20))
 
     def SetUpFunctions(self):
         self.urlLineEdit.returnPressed.connect(self.OnEnterPressed)
@@ -64,7 +88,7 @@ class Browser(QtWidgets.QWidget, BrowserUI.Ui_Form):
             cursor.execute("INSERT INTO searchHistory (query) VALUES (?)", (url[1], ))
             conn.commit()
             conn.close()
-        
+
     def CreateNewWindow(self):
         global windows
         newWindow = Browser()
