@@ -88,7 +88,7 @@ class Browser(QtWidgets.QWidget, BrowserUI.Ui_Form):
     
     def UrlChanged(self):
         global sessionSettings
-        print("CHANGED")
+        print("CHANGED URL")
         self.urlLineEdit.setText(self.webPage.url().toString())
         if bool(sessionSettings[1][2]):
             conn = sqlite3.connect('browser.db')
@@ -146,13 +146,14 @@ class Browser(QtWidgets.QWidget, BrowserUI.Ui_Form):
         return action
     
     def AddToBookmarks(self):
-        print("ADDED")
-        conn = sqlite3.connect("browser.db")
-        cursor = conn.cursor()
-        cursor.execute("INSERT INTO bookmarks (bookmarkName, bookmarkUrl) VALUES (?, ?)", (self.webPage.page().title(), self.webPage.url().toString()))
-        conn.commit()
-        conn.close()
-        self.LoadBookmarksTab()
+        if (self.webPage.url().toString() != ""):
+            print("ADDED TO BOOKMARKS")
+            conn = sqlite3.connect("browser.db")
+            cursor = conn.cursor()
+            cursor.execute("INSERT INTO bookmarks (bookmarkName, bookmarkUrl) VALUES (?, ?)", (self.webPage.page().title(), self.webPage.url().toString()))
+            conn.commit()
+            conn.close()
+            self.LoadBookmarksTab()
     
     def LoadFromBookmarksTab(self, url):
         self.webPage.setParent(None)
@@ -161,12 +162,11 @@ class Browser(QtWidgets.QWidget, BrowserUI.Ui_Form):
 
         self.webPage.urlChanged.connect(self.UrlChanged)
         
-        print(url)
         self.webPage.setUrl(QUrl(url))
     
     def loadIcons(self):
         self.menuButton.setIcon(QtGui.QIcon("svgs/menu.svg"))
-        self.menuButton.setIconSize(QSize(16, 16))
+        self.menuButton.setIconSize(QSize(20, 20))
 
         self.reloadButton.setIcon(QtGui.QIcon("svgs/refresh.svg"))
         self.reloadButton.setIconSize(QSize(20, 20))
@@ -184,7 +184,7 @@ class Browser(QtWidgets.QWidget, BrowserUI.Ui_Form):
         self.newTabButton.setIconSize(QSize(20, 20))
 
         self.searchButton.setIcon(QtGui.QIcon("svgs/search.svg"))
-        self.searchButton.setIconSize(QSize(20, 20))
+        self.searchButton.setIconSize(QSize(35, 35))
 
 
 
@@ -303,6 +303,7 @@ class BrowserHistory(QtWidgets.QWidget, HistoryUI.Ui_Form):
         self.historyTable.setColumnWidth(1, 400)
         self.historyTable.setColumnWidth(2, 400)
         self.historyTable.setColumnWidth(3, 200)
+        self.historyTable.setColumnHidden(0, True)
     
     def OpenPage(self):
         url = self.historyTable.item(self.historyTable.currentRow(), 1).text()
@@ -312,13 +313,14 @@ class BrowserHistory(QtWidgets.QWidget, HistoryUI.Ui_Form):
         windows[-1].show()
     
     def DeleteSelected(self):
-        conn = sqlite3.connect('browser.db')
-        cursor = conn.cursor()
-        selectedID = int(self.historyTable.item(self.historyTable.currentRow(), 0).text())
-        self.historyTable.removeRow(self.historyTable.currentRow())
-        cursor.execute("DELETE FROM browserHistory WHERE id = ?", (selectedID, ))
-        conn.commit()
-        conn.close()
+        if self.historyTable.item(self.historyTable.currentRow(), 0) != None:
+            conn = sqlite3.connect('browser.db')
+            cursor = conn.cursor()
+            selectedID = int(self.historyTable.item(self.historyTable.currentRow(), 0).text())
+            self.historyTable.removeRow(self.historyTable.currentRow())
+            cursor.execute("DELETE FROM browserHistory WHERE id = ?", (selectedID, ))
+            conn.commit()
+            conn.close()
 
 
 
@@ -353,6 +355,7 @@ class SearchHistory(QtWidgets.QWidget, HistoryUI.Ui_Form):
         self.historyTable.setColumnWidth(0, 60)
         self.historyTable.setColumnWidth(1, 400)
         self.historyTable.setColumnWidth(2, 400)
+        self.historyTable.setColumnHidden(0, True)
     
     def OpenPage(self):
         url = self.historyTable.item(self.historyTable.currentRow(), 1).text()
@@ -362,13 +365,14 @@ class SearchHistory(QtWidgets.QWidget, HistoryUI.Ui_Form):
         windows[-1].show()
     
     def DeleteSelected(self):
-        conn = sqlite3.connect('browser.db')
-        cursor = conn.cursor()
-        selectedID = int(self.historyTable.item(self.historyTable.currentRow(), 0).text())
-        self.historyTable.removeRow(self.historyTable.currentRow())
-        cursor.execute("DELETE FROM searchHistory WHERE id = ?", (selectedID, ))
-        conn.commit()
-        conn.close()
+        if self.historyTable.item(self.historyTable.currentRow(), 0) != None:
+            conn = sqlite3.connect('browser.db')
+            cursor = conn.cursor()
+            selectedID = int(self.historyTable.item(self.historyTable.currentRow(), 0).text())
+            self.historyTable.removeRow(self.historyTable.currentRow())
+            cursor.execute("DELETE FROM searchHistory WHERE id = ?", (selectedID, ))
+            conn.commit()
+            conn.close()
 
 
 
@@ -384,6 +388,7 @@ class Bookmarks(QtWidgets.QWidget, HistoryUI.Ui_Form):
         self.historyName.setText("Закладки")
         self.LoadBookmarks()
         self.historyTable.itemDoubleClicked.connect(self.OpenPage)
+        self.deleteSelectedButton.clicked.connect(self.DeleteSelected)
     
     def Close(self):
         self.close()
@@ -402,6 +407,7 @@ class Bookmarks(QtWidgets.QWidget, HistoryUI.Ui_Form):
         self.historyTable.setColumnWidth(0, 60)
         self.historyTable.setColumnWidth(1, 400)
         self.historyTable.setColumnWidth(2, 400)
+        self.historyTable.setColumnHidden(0, True)
     
     def OpenPage(self):
         url = self.historyTable.item(self.historyTable.currentRow(), 2).text()
@@ -411,13 +417,14 @@ class Bookmarks(QtWidgets.QWidget, HistoryUI.Ui_Form):
         windows[-1].show()
     
     def DeleteSelected(self):
-        conn = sqlite3.connect('browser.db')
-        cursor = conn.cursor()
-        selectedID = int(self.historyTable.item(self.historyTable.currentRow(), 0).text())
-        self.historyTable.removeRow(self.historyTable.currentRow())
-        cursor.execute("DELETE FROM bookmarks WHERE id = ?", (selectedID, ))
-        conn.commit()
-        conn.close()
+        if self.historyTable.item(self.historyTable.currentRow(), 0) != None:
+            conn = sqlite3.connect('browser.db')
+            cursor = conn.cursor()
+            selectedID = int(self.historyTable.item(self.historyTable.currentRow(), 0).text())
+            self.historyTable.removeRow(self.historyTable.currentRow())
+            cursor.execute("DELETE FROM bookmarks WHERE id = ?", (selectedID, ))
+            conn.commit()
+            conn.close()
 
 
 
@@ -500,8 +507,7 @@ if __name__ == "__main__":
     (2, "saveSearchHistoryFlag", 1)]
     urlStarts = [
     "https://",
-    "http://",
-    "www."]
+    "http://"]
     
     CreateTables()
 
