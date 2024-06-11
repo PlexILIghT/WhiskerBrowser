@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>622</width>
-    <height>480</height>
+    <width>746</width>
+    <height>512</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -189,6 +189,54 @@
          </property>
          <property name="text">
           <string>Не сохранять историю поиска</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_4">
+         <property name="font">
+          <font>
+           <pointsize>16</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>Закладки</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="favoritesButton">
+         <property name="maximumSize">
+          <size>
+           <width>200</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>Закладки</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="clearFavoritesButton">
+         <property name="maximumSize">
+          <size>
+           <width>200</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>Удалить все закладки</string>
          </property>
         </widget>
        </item>

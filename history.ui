@@ -16,21 +16,6 @@
   <layout class="QGridLayout" name="gridLayout_2">
    <item row="0" column="0">
     <layout class="QGridLayout" name="gridLayout">
-     <item row="0" column="0">
-      <widget class="QLabel" name="historyName">
-       <property name="font">
-        <font>
-         <pointsize>20</pointsize>
-        </font>
-       </property>
-       <property name="text">
-        <string>История ...</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
-       </property>
-      </widget>
-     </item>
      <item row="2" column="0">
       <layout class="QHBoxLayout" name="horizontalLayout_2">
        <item>
@@ -45,6 +30,30 @@
           </size>
          </property>
         </spacer>
+       </item>
+       <item>
+        <widget class="QPushButton" name="deleteSelectedButton">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>175</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>Удалить выбранное</string>
+         </property>
+        </widget>
        </item>
        <item>
         <widget class="QPushButton" name="backButton">
@@ -72,8 +81,23 @@
        </item>
       </layout>
      </item>
+     <item row="0" column="0">
+      <widget class="QLabel" name="historyName">
+       <property name="font">
+        <font>
+         <pointsize>20</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>История ...</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
      <item row="1" column="0">
-      <widget class="QListWidget" name="historyList"/>
+      <widget class="QTableWidget" name="historyTable"/>
      </item>
     </layout>
    </item>

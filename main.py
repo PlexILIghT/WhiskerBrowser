@@ -133,11 +133,15 @@ class Browser(QtWidgets.QWidget, BrowserUI.Ui_Form):
         cursor = conn.cursor()
         favorites = list(cursor.execute("SELECT * FROM favorites"))
         conn.close()
+        self.favoriteTab.clear()
         for item in favorites:
-            action = QtWidgets.QWidgetAction(self)
-            action.setText(item[1])
-            action.triggered.connect(lambda: self.LoadFromFavoritesTab(item[2]))
-            self.favoriteTab.addAction(action)
+            self.favoriteTab.addAction(self.CreateAction(item))
+    
+    def CreateAction(self, item):
+        action = QtWidgets.QWidgetAction(self)
+        action.setText(item[1])
+        action.triggered.connect(lambda : self.LoadFromFavoritesTab(item[2]))
+        return action
     
     def AddToFavorites(self):
         print("ADDED")
@@ -146,6 +150,7 @@ class Browser(QtWidgets.QWidget, BrowserUI.Ui_Form):
         cursor.execute("INSERT INTO favorites (favoriteName, favoriteUrl) VALUES (?, ?)", (self.webPage.page().title(), self.webPage.url().toString()))
         conn.commit()
         conn.close()
+        self.LoadFavoritesTab()
     
     def LoadFromFavoritesTab(self, url):
         self.webPage.setParent(None)
