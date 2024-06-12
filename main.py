@@ -196,6 +196,7 @@ class Browser(QtWidgets.QWidget, BrowserUI.Ui_Form):
 
 
 
+
 class Menu(QtWidgets.QWidget, MenuUI.Ui_Form):
     def __init__(self):
         super().__init__()
@@ -279,11 +280,11 @@ class Menu(QtWidgets.QWidget, MenuUI.Ui_Form):
             conn.close()
     
     def LoadIcons(self):
-        self.searchSystem.setItemIcon(0, QtGui.QIcon("svgs/refresh.svg"))
-        self.searchSystem.setItemIcon(1, QtGui.QIcon("svgs/newtab.svg"))
-        self.searchSystem.setItemIcon(2, QtGui.QIcon("svgs/refresh.svg"))
-        self.searchSystem.setItemIcon(3, QtGui.QIcon("svgs/newtab.svg"))
-        self.searchSystem.setItemIcon(4, QtGui.QIcon("svgs/refresh.svg"))
+        self.searchSystem.setItemIcon(0, QtGui.QIcon("svgs/google.png"))
+        self.searchSystem.setItemIcon(1, QtGui.QIcon("svgs/yandex.png"))
+        self.searchSystem.setItemIcon(2, QtGui.QIcon("svgs/bing.png"))
+        self.searchSystem.setItemIcon(3, QtGui.QIcon("svgs/yahoo.png"))
+        self.searchSystem.setItemIcon(4, QtGui.QIcon("svgs/duckduckgo.png"))
         self.searchSystem.setIconSize(QSize(35, 35))
 
 
