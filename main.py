@@ -3,6 +3,7 @@ import BrowserUI, MenuUI, HistoryUI
 from PyQt6.QtWebEngineWidgets import QWebEngineView
 from PyQt6.QtCore import QUrl, QSize
 import sqlite3
+import os
 
 class Browser(QtWidgets.QWidget, BrowserUI.Ui_Form):
     def __init__(self):
@@ -173,25 +174,25 @@ class Browser(QtWidgets.QWidget, BrowserUI.Ui_Form):
             self.searchStart = "https://duckduckgo.com/?t=h_&q="
     
     def LoadIcons(self):
-        self.menuButton.setIcon(QtGui.QIcon("svgs/menu.svg"))
+        self.menuButton.setIcon(QtGui.QIcon(ResourcePath("svgs/menu.svg")))
         self.menuButton.setIconSize(QSize(20, 20))
 
-        self.reloadButton.setIcon(QtGui.QIcon("svgs/refresh.svg"))
+        self.reloadButton.setIcon(QtGui.QIcon(ResourcePath("svgs/refresh.svg")))
         self.reloadButton.setIconSize(QSize(20, 20))
 
-        self.backButton.setIcon(QtGui.QIcon("svgs/back1.svg"))
+        self.backButton.setIcon(QtGui.QIcon(ResourcePath("svgs/back1.svg")))
         self.backButton.setIconSize(QSize(20, 20))
 
-        self.forwardButton.setIcon(QtGui.QIcon("svgs/forward.svg"))
+        self.forwardButton.setIcon(QtGui.QIcon(ResourcePath("svgs/forward.svg")))
         self.forwardButton.setIconSize(QSize(20, 20))
 
-        self.addToBookmarksButton.setIcon(QtGui.QIcon("svgs/bookmark.svg"))
+        self.addToBookmarksButton.setIcon(QtGui.QIcon(ResourcePath("svgs/bookmark.svg")))
         self.addToBookmarksButton.setIconSize(QSize(20, 20))
 
-        self.newTabButton.setIcon(QtGui.QIcon("svgs/newtab.svg"))
+        self.newTabButton.setIcon(QtGui.QIcon(ResourcePath("svgs/newtab.svg")))
         self.newTabButton.setIconSize(QSize(20, 20))
 
-        self.searchButton.setIcon(QtGui.QIcon("svgs/search.svg"))
+        self.searchButton.setIcon(QtGui.QIcon(ResourcePath("svgs/search.svg")))
         self.searchButton.setIconSize(QSize(35, 35))
 
 
@@ -280,11 +281,14 @@ class Menu(QtWidgets.QWidget, MenuUI.Ui_Form):
             conn.close()
     
     def LoadIcons(self):
-        self.searchSystem.setItemIcon(0, QtGui.QIcon("svgs/google.png"))
-        self.searchSystem.setItemIcon(1, QtGui.QIcon("svgs/yandex.png"))
-        self.searchSystem.setItemIcon(2, QtGui.QIcon("svgs/bing.png"))
-        self.searchSystem.setItemIcon(3, QtGui.QIcon("svgs/yahoo.png"))
-        self.searchSystem.setItemIcon(4, QtGui.QIcon("svgs/duckduckgo.png"))
+        icons = [
+            QtGui.QIcon(ResourcePath("svgs/google.png")),
+            QtGui.QIcon(ResourcePath("svgs/yandex.png")),
+            QtGui.QIcon(ResourcePath("svgs/bing.png")),
+            QtGui.QIcon(ResourcePath("svgs/yahoo.png")),
+            QtGui.QIcon(ResourcePath("svgs/duckduckgo.png"))]
+        for i, icon in enumerate(icons):
+            self.searchSystem.setItemIcon(i, icon)
         self.searchSystem.setIconSize(QSize(35, 35))
 
 
@@ -512,6 +516,14 @@ def CreateTables():
         cursor.executemany("INSERT INTO settings (id, settingName, settingValue) VALUES (?, ?, ?)", defaultSettings)
     conn.commit()
     conn.close()
+
+
+def ResourcePath(relativePath):
+    try:
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relativePath)
 
 
 
