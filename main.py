@@ -58,7 +58,8 @@ class Browser(QtWidgets.QWidget, BrowserUI.Ui_Form):
         if bool(sessionSettings[2][2] and url[1] != None):
             conn = sqlite3.connect("browser.db")
             cursor = conn.cursor()
-            cursor.execute("INSERT INTO searchHistory (query) VALUES (?)", (url[1], ))
+            id = list(cursor.execute("SELECT id FROM browserHistory WHERE url = ?", (url[0], )))
+            cursor.execute("INSERT INTO searchHistory (id, query) VALUES (?, ?)", (id[-1][0], url[1]))
             conn.commit()
             conn.close()
 
@@ -86,7 +87,7 @@ class Browser(QtWidgets.QWidget, BrowserUI.Ui_Form):
         print("CHANGED URL")
         self.urlLineEdit.setText(self.webPage.url().toString())
         if bool(sessionSettings[1][2]):
-            conn = sqlite3.connect('browser.db')
+            conn = sqlite3.connect("browser.db")
             cursor = conn.cursor()
             cursor.execute('INSERT INTO browserHistory (url, title) VALUES (?, ?)', (self.webPage.url().toString(), self.webPage.title()))
             conn.commit()
@@ -114,8 +115,9 @@ class Browser(QtWidgets.QWidget, BrowserUI.Ui_Form):
         cursor = conn.cursor()
         searchHistory = list(cursor.execute("SELECT query FROM searchHistory"))
         conn.close()
-        for item in searchHistory:
-            self.searchHistoryList.addItem(item[0])
+        self.searchHistoryList.clear()
+        for i in range(len(searchHistory) - 1, -1, -1):
+            self.searchHistoryList.addItem(searchHistory[i][0])
     
     def LoadFromSearchHistory(self):
         self.webPage.setParent(None)
@@ -125,16 +127,17 @@ class Browser(QtWidgets.QWidget, BrowserUI.Ui_Form):
         self.webPage.urlChanged.connect(self.UrlChanged)
         self.SetSearchStart()
         
-        self.webPage.setUrl(QUrl(self.searchStart + self.searchHistoryList.currentItem().text()))
+        self.webPage.LoadUrl(QUrl(self.searchStart + self.searchHistoryList.currentItem().text()))
 
     def LoadBookmarksTab(self):
-        conn = sqlite3.connect("browser.db")
-        cursor = conn.cursor()
-        bookmarks = list(cursor.execute("SELECT * FROM bookmarks"))
-        conn.close()
-        self.bookmarksTab.clear()
-        for item in bookmarks:
-            self.bookmarksTab.addAction(self.CreateAction(item))
+        for window in windows:
+            conn = sqlite3.connect("browser.db")
+            cursor = conn.cursor()
+            bookmarks = list(cursor.execute("SELECT * FROM bookmarks"))
+            conn.close()
+            window.bookmarksTab.clear()
+            for item in bookmarks:
+                window.bookmarksTab.addAction(self.CreateAction(item))
     
     def CreateAction(self, item):
         action = QtWidgets.QWidgetAction(self)
@@ -266,6 +269,8 @@ class Menu(QtWidgets.QWidget, MenuUI.Ui_Form):
             cursor.execute("DELETE FROM searchHistory")
             conn.commit()
             conn.close()
+            for window in windows:
+                window.LoadSearchHistory()
     
     def OpenBookmarks(self):
         self.bookmarks = Bookmarks()
@@ -279,6 +284,8 @@ class Menu(QtWidgets.QWidget, MenuUI.Ui_Form):
             cursor.execute("DELETE FROM bookmarks")
             conn.commit()
             conn.close()
+            for window in windows:
+                window.LoadBookmarksTab()
     
     def LoadIcons(self):
         icons = [
@@ -311,7 +318,7 @@ class BrowserHistory(QtWidgets.QWidget, HistoryUI.Ui_Form):
         self.close()
     
     def LoadBrowserHistory(self):
-        conn = sqlite3.connect('browser.db')
+        conn = sqlite3.connect("browser.db")
         cursor = conn.cursor()
         data = list(cursor.execute("SELECT id, url, title, timestamp FROM browserHistory"))
         self.historyTable.setColumnCount(4)
@@ -336,7 +343,7 @@ class BrowserHistory(QtWidgets.QWidget, HistoryUI.Ui_Form):
     
     def DeleteSelected(self):
         if self.historyTable.item(self.historyTable.currentRow(), 0) != None:
-            conn = sqlite3.connect('browser.db')
+            conn = sqlite3.connect("browser.db")
             cursor = conn.cursor()
             selectedID = int(self.historyTable.item(self.historyTable.currentRow(), 0).text())
             self.historyTable.removeRow(self.historyTable.currentRow())
@@ -364,14 +371,14 @@ class SearchHistory(QtWidgets.QWidget, HistoryUI.Ui_Form):
         self.close()
     
     def LoadSearchHistory(self):
-        conn = sqlite3.connect('browser.db')
+        conn = sqlite3.connect("browser.db")
         cursor = conn.cursor()
-        data = list(cursor.execute("SELECT id, query, timestamp FROM searchHistory"))
-        self.historyTable.setColumnCount(3)
-        self.historyTable.setHorizontalHeaderLabels(("ID", "Запрос", "Время"))
+        data = list(cursor.execute("SELECT searchHistory.id, searchHistory.query, browserHistory.url, searchHistory.timestamp FROM searchHistory JOIN browserHistory ON searchHistory.id = browserHistory.id"))
+        self.historyTable.setColumnCount(4)
+        self.historyTable.setHorizontalHeaderLabels(("ID", "Запрос", "url", "Время"))
         self.historyTable.setRowCount(len(data))
         for row in range(len(data)):
-            for column in range(3):
+            for column in range(4):
                 item = QtWidgets.QTableWidgetItem(str(data[row][column]))
                 self.historyTable.setItem(row, column, item)
         self.historyTable.setColumnWidth(0, 60)
@@ -388,13 +395,15 @@ class SearchHistory(QtWidgets.QWidget, HistoryUI.Ui_Form):
     
     def DeleteSelected(self):
         if self.historyTable.item(self.historyTable.currentRow(), 0) != None:
-            conn = sqlite3.connect('browser.db')
+            conn = sqlite3.connect("browser.db")
             cursor = conn.cursor()
             selectedID = int(self.historyTable.item(self.historyTable.currentRow(), 0).text())
             self.historyTable.removeRow(self.historyTable.currentRow())
             cursor.execute("DELETE FROM searchHistory WHERE id = ?", (selectedID, ))
             conn.commit()
             conn.close()
+            for window in windows:
+                window.LoadSearchHistory()
 
 
 
@@ -416,7 +425,7 @@ class Bookmarks(QtWidgets.QWidget, HistoryUI.Ui_Form):
         self.close()
     
     def LoadBookmarks(self):
-        conn = sqlite3.connect('browser.db')
+        conn = sqlite3.connect("browser.db")
         cursor = conn.cursor()
         data = list(cursor.execute("SELECT id, bookmarkName, bookmarkUrl FROM bookmarks"))
         self.historyTable.setColumnCount(3)
@@ -440,13 +449,15 @@ class Bookmarks(QtWidgets.QWidget, HistoryUI.Ui_Form):
     
     def DeleteSelected(self):
         if self.historyTable.item(self.historyTable.currentRow(), 0) != None:
-            conn = sqlite3.connect('browser.db')
+            conn = sqlite3.connect("browser.db")
             cursor = conn.cursor()
             selectedID = int(self.historyTable.item(self.historyTable.currentRow(), 0).text())
             self.historyTable.removeRow(self.historyTable.currentRow())
             cursor.execute("DELETE FROM bookmarks WHERE id = ?", (selectedID, ))
             conn.commit()
             conn.close()
+            for window in windows:
+                window.LoadBookmarksTab()
 
 
 
@@ -471,7 +482,7 @@ class ClearDialog(QtWidgets.QDialog):
 
 
 def CreateTables():
-    conn = sqlite3.connect('browser.db')
+    conn = sqlite3.connect("browser.db")
     cursor = conn.cursor()
 
     # История поиска
