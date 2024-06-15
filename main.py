@@ -127,7 +127,7 @@ class Browser(QtWidgets.QWidget, BrowserUI.Ui_Form):
         self.webPage.urlChanged.connect(self.UrlChanged)
         self.SetSearchStart()
         
-        self.webPage.LoadUrl(QUrl(self.searchStart + self.searchHistoryList.currentItem().text()))
+        self.LoadUrl(QUrl(self.searchStart + self.searchHistoryList.currentItem().text()))
 
     def LoadBookmarksTab(self):
         for window in windows:
