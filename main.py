@@ -68,6 +68,7 @@ class Browser(QtWidgets.QWidget, BrowserUI.Ui_Form):
         newWindow = Browser()
         windows.append(newWindow)
         windows[-1].show()
+        windows[-1].LoadBookmarksTab()
     
     def Back(self):
         self.webPage.back()
